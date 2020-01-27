@@ -9,27 +9,67 @@ export default class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      region: {
-        latitude: 40.78343,
-        longitude: -73.96625,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421
+      initialRegion: {
+        latitude: 40.7484,
+        longitude: -73.9857
+      },
+      mapRegion: {
+        latitude: 40.7484,
+        longitude: -73.9857,
+        latitudeDelta: 5,
+        longitudeDelta: 5
       },
       loading: true,
       treeMarkers: []
     }
-  //  this.fetchTreeData = this.fetchTreeData.bind(this)
+  this.fetchTreeData = this.fetchTreeData.bind(this)
+  this.getCurrentLocation = this.getCurrentLocation.bind(this)
+  this.goToInitialLocation = this.goToInitialLocation.bind(this)
   }
 
   async componentDidMount() {
     // this.fetchTreeData()
-    await this.fetchTreeData()
+    await this.getCurrentLocation()
+    // await this.fetchTreeData()
+    // await console.log("INNITIAL REGION AFTER component did mount", this.state.initialRegion)
 
   }
 
+  async getCurrentLocation() {
+      let position = navigator.geolocation.getCurrentPosition(
+        async (position)=> {
+          let region = {
+            latitude: parseFloat(position.coords.latitude),
+            longitude: parseFloat(position.coords.longitude),
+            latitudeDelta: 5,
+            longitudeDelta: 5
+          }
+          console.log("REGION", region)
+          await this.setState({
+            initialRegion: region
+        })
+        console.log('State after setState', this.state.initialRegion)
+        await this.fetchTreeData()
+        },
+        (error) => {
+          console.log(error)
+        },
+        {enableAcuracy: true, timeout: 2000, maximumAge: 1000}
+      )
+  }
+
+
   async fetchTreeData() {
     try {
-      const response = await fetch('https://data.cityofnewyork.us/resource/5rq2-4hqu.json?zip_city=New%20York&$select=tree_id,%20spc_common,%20the_geom,%20spc_latin&$limit=50000')
+      let encodedLocation = ''
+      if (this.state.initialRegion.latitude) {
+        encodedLocation = encodeURIComponent(`${this.state.initialRegion.latitude}, ${this.state.initialRegion.longitude}`)
+      }
+      else {
+        encodedLocation = encodeURIComponent("40.7484, -73.9857")
+      }
+      console.log("ENCODED LOCATION", encodedLocation)
+      const response = await fetch(`https://data.cityofnewyork.us/resource/5rq2-4hqu.json?zip_city=New%20York&$select=tree_id,%20spc_common,%20the_geom,%20spc_latin&$where=within_circle(the_geom,${encodedLocation},%201000)&$limit=20000`)
       const treeMarkers = await response.json()
       // console.log(treeMarkers)
       this.setState({
@@ -42,37 +82,35 @@ export default class App extends React.Component {
     }
   }
 
-  // renderTreeMarkers() {
-  //   this.state.treeMarkers.map((tree, index) => {
+  goToInitialLocation() {
+    let initialRegion = Object.assign({}, this.state.initialRegion)
+    initialRegion["latitudeDelta"] = 0.005
+    initialRegion["longitudeDelta"] = 0.005
+    this.mapView.animateToRegion(initialRegion, 2000)
+  }
 
-  //     const coordinates = {
-  //       latitude: tree.the_geom.coordinates[1],
-  //       longitude: tree.the_geom.coordinates[0]
-  //     }
-
-  //     const commonName = tree.spc_common
-  //     const latinName = tree.spc_latin
-
-  //     return (
-  //       <MapView.Marker
-  //         key = {index}
-  //         coordinate = {coordinates}
-  //         title = {commonName}
-  //         description = {latinName}
-  //       >
-  //       </MapView.Marker>
-  //     )
-  //   })
-  // }
 
   render() {
     console.log(this.state.treeMarkers.length)
+    if (this.state.loading) {
+      return (
+        <Text>Loadig...</Text>
+      )
+    }
+
+
     return (
     <View style={styles.container}>
       <MapView
         // provider={PROVIDER_GOOGLE}
         style={styles.mapStyle}
-        region={this.state.region} showsUserLocation={true}
+        region={this.state.mapRegion}
+        followsUserLocation={true}
+        ref={ref => {this.mapView = ref}}
+        zoomEnabled={true}
+        showsUserLocation={true}
+        onMapReady={this.goToInitialLocation.bind(this)}
+        initialRegion={this.state.initialRegion}
       >
         {this.state.isloading ? null : this.state.treeMarkers.map((tree, index) => {
           const coordinates = {
@@ -81,6 +119,8 @@ export default class App extends React.Component {
           }
           const commonName = tree.spc_common
           const latinName = tree.spc_latin
+          let pin = "green"
+          commonName === "honeylocust" ? pin = 'orange' : pin = 'green'
 
           return (
             <Marker
@@ -88,7 +128,7 @@ export default class App extends React.Component {
               coordinate = {coordinates}
               title = {commonName}
               description = {latinName}
-              pinColor = "green"
+              pinColor = {pin}
             >
             </Marker>
           )
