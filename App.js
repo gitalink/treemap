@@ -1,6 +1,6 @@
 import React from 'react';
 import MapView, { PROVIDER_GOOGLE, Marker} from 'react-native-maps';
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, Picker } from 'react-native';
 
 
 
@@ -14,13 +14,14 @@ export default class App extends React.Component {
         longitude: -73.9857
       },
       mapRegion: {
-        latitude: 40.7484,
-        longitude: -73.9857,
-        latitudeDelta: 5,
-        longitudeDelta: 5
+        latitude: 40.705,
+        longitude: -74.0087,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005
       },
       loading: true,
-      treeMarkers: []
+      treeMarkers: [],
+      selectedTree: "all"
     }
   this.fetchTreeData = this.fetchTreeData.bind(this)
   this.getCurrentLocation = this.getCurrentLocation.bind(this)
@@ -46,7 +47,8 @@ export default class App extends React.Component {
           }
           console.log("REGION", region)
           await this.setState({
-            initialRegion: region
+            initialRegion: region,
+            mapRegion: region
         })
         console.log('State after setState', this.state.initialRegion)
         await this.fetchTreeData()
@@ -92,6 +94,7 @@ export default class App extends React.Component {
 
   render() {
     console.log(this.state.treeMarkers.length)
+    console.log(this.state.selectedTree)
     if (this.state.loading) {
       return (
         <Text>Loadig...</Text>
@@ -120,7 +123,7 @@ export default class App extends React.Component {
           const commonName = tree.spc_common
           const latinName = tree.spc_latin
           let pin = "green"
-          commonName === "honeylocust" ? pin = 'orange' : pin = 'green'
+          commonName === this.state.selectedTree ? pin = 'orange' : pin = 'green'
 
           return (
             <Marker
@@ -135,6 +138,20 @@ export default class App extends React.Component {
         })
         }
       </MapView>
+        <Picker
+          selectedValue={this.state.selectedTree}
+           style={{position: "absolute", bottom: 50, height: 50, width: 100}}
+           itemStyle={{height:44}}
+           onValueChange={(itemValue, itemIndex) => {
+           this.setState({selectedTree: itemValue})
+           this.goToInitialLocation()
+          }
+        }>
+          <Picker.Item label="no highlight" value="all"/>
+          <Picker.Item label="ginkgo" value="ginkgo"/>
+          <Picker.Item label="honeylocust" value="honeylocust"/>
+          <Picker.Item label="Japanese zelkova" value="Japanese zelkova"/>
+        </Picker>
       {/* <TouchableOpacity
         onPress={() => alert('Hello, world!')}
         style={{backgroundColor:'red'}}>
@@ -150,10 +167,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   mapStyle: {
-    flex: 1,
+    flex: 0.8,
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   }
