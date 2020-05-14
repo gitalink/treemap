@@ -1,6 +1,6 @@
 import React from 'react';
 import MapView, {Marker} from 'react-native-maps';
-import { StyleSheet, Text, View, Dimensions, Picker} from 'react-native';
+import {StyleSheet, Text, View, Dimensions, Picker} from 'react-native';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -38,7 +38,6 @@ export default class App extends React.Component {
             latitudeDelta: 5,
             longitudeDelta: 5
           }
-          console.log("REGION", region)
           await this.setState({
             initialRegion: region,
             mapRegion: region
@@ -61,7 +60,6 @@ export default class App extends React.Component {
       else {
         encodedLocation = encodeURIComponent("40.7484, -73.9857")
       }
-      console.log("ENCODED LOCATION", encodedLocation)
       const response = await fetch(`https://data.cityofnewyork.us/resource/5rq2-4hqu.json?zip_city=New%20York&$select=tree_id,%20spc_common,%20the_geom,%20spc_latin&$where=within_circle(the_geom,${encodedLocation},%201000)&$limit=20000`)
       const treeMarkers = await response.json()
       this.setState({
