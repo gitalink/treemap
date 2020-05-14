@@ -1,11 +1,8 @@
 import React from 'react';
-import MapView, { PROVIDER_GOOGLE, Marker} from 'react-native-maps';
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, Picker } from 'react-native';
-
-
+import MapView, {Marker} from 'react-native-maps';
+import { StyleSheet, Text, View, Dimensions, Picker} from 'react-native';
 
 export default class App extends React.Component {
-  // let [location, selectedTree] = React.useState(null)
   constructor(props) {
     super(props)
     this.state = {
@@ -29,11 +26,7 @@ export default class App extends React.Component {
   }
 
   async componentDidMount() {
-    // this.fetchTreeData()
     await this.getCurrentLocation()
-    // await this.fetchTreeData()
-    // await console.log("INNITIAL REGION AFTER component did mount", this.state.initialRegion)
-
   }
 
   async getCurrentLocation() {
@@ -50,7 +43,6 @@ export default class App extends React.Component {
             initialRegion: region,
             mapRegion: region
         })
-        console.log('State after setState', this.state.initialRegion)
         await this.fetchTreeData()
         },
         (error) => {
@@ -73,7 +65,6 @@ export default class App extends React.Component {
       console.log("ENCODED LOCATION", encodedLocation)
       const response = await fetch(`https://data.cityofnewyork.us/resource/5rq2-4hqu.json?zip_city=New%20York&$select=tree_id,%20spc_common,%20the_geom,%20spc_latin&$where=within_circle(the_geom,${encodedLocation},%201000)&$limit=20000`)
       const treeMarkers = await response.json()
-      // console.log(treeMarkers)
       this.setState({
         loading: false,
         treeMarkers: treeMarkers
@@ -93,8 +84,6 @@ export default class App extends React.Component {
 
 
   render() {
-    console.log(this.state.treeMarkers.length)
-    console.log(this.state.selectedTree)
     if (this.state.loading) {
       return (
         <Text>Loadig...</Text>
@@ -105,7 +94,6 @@ export default class App extends React.Component {
     return (
     <View style={styles.container}>
       <MapView
-        // provider={PROVIDER_GOOGLE}
         style={styles.mapStyle}
         region={this.state.mapRegion}
         followsUserLocation={true}
@@ -152,11 +140,6 @@ export default class App extends React.Component {
           <Picker.Item label="honeylocust" value="honeylocust"/>
           <Picker.Item label="Japanese zelkova" value="Japanese zelkova"/>
         </Picker>
-      {/* <TouchableOpacity
-        onPress={() => alert('Hello, world!')}
-        style={{backgroundColor:'red'}}>
-          <Text style={{fontSize:20, color: '#fff'}}>Say Hello</Text>
-      </TouchableOpacity> */}
     </View>
   )
   }
