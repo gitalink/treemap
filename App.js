@@ -52,7 +52,6 @@ export default class App extends React.Component {
       )
   }
 
-
   async fetchTreeData() {
     try {
       let encodedLocation = ''
@@ -82,14 +81,12 @@ export default class App extends React.Component {
     this.mapView.animateToRegion(initialRegion, 2000)
   }
 
-
   render() {
     if (this.state.loading) {
       return (
         <Text>Loadig...</Text>
       )
     }
-
 
     return (
     <View style={styles.container}>
