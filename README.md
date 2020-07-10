@@ -13,9 +13,8 @@ NYC Treemap is a mobile app for New Yorkers who are curious to know more about t
 users location, opens up a map centering around that location and displays all the trees within 1 mile radius as markers. 
 By hovering on the marker, users can see metadata about the tree, such as common name and latin name. 
 
-![trees1](https://github.com/gitalink/treemap/blob/master/images/trees1_small.png)
-![trees2](https://github.com/gitalink/treemap/blob/master/images/trees2_small.png)
-
+<img src="https://github.com/gitalink/treemap/blob/master/images/mockup1.png" width="800px"/>
+<img src="https://github.com/gitalink/treemap/blob/master/images/mockup2.png" width="800px"/>
 
 ## Dataset
 https://dev.socrata.com/foundry/data.cityofnewyork.us/5rq2-4hqu
